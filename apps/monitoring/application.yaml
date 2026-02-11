@@ -47,6 +47,7 @@ spec:
               serviceMonitorNamespaceSelector: {}
               podMonitorSelector: {}
               podMonitorNamespaceSelector: {}
+          # CRDs are managed by a separate prometheus-operator-crds Helm release.
           crds:
             enabled: false
           prometheus-node-exporter:
