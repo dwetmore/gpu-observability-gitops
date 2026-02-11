@@ -52,6 +52,8 @@ spec:
               enabled: false
               patch:
                 enabled: false
+          admissionWebhooks:
+            enabled: false
           # CRDs are managed by a separate prometheus-operator-crds Helm release.
           crds:
             enabled: false
