@@ -45,6 +45,11 @@ spec:
               serviceMonitorNamespaceSelector: {}
               podMonitorSelector: {}
               podMonitorNamespaceSelector: {}
+          prometheus-node-exporter:
+            hostRootFsMount:
+              enabled: false
+            extraArgs:
+              - --web.listen-address=:9100
     - repoURL: https://github.com/dwetmore/gpu-observability-gitops.git
       targetRevision: main
       path: apps/monitoring/extras
