@@ -1,0 +1,34 @@
+{
+  "title": "GPU DCGM Overview",
+  "uid": "gpu-dcgm-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "GPU Utilization %",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "GPU Memory Used (MiB)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_FB_USED) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "GPU Temperature (C)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_TEMP) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "GPU Power Usage (W)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_POWER_USAGE) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+    }
+  ],
+  "time": {"from": "now-1h", "to": "now"}
+}
