@@ -24,7 +24,7 @@ spec:
               enabled: true
               ingressClassName: public
               hosts:
-                - grafana.<NODE_IP>.nip.io
+                - grafana.172.17.93.185.nip.io
             sidecar:
               dashboards:
                 enabled: true
@@ -42,7 +42,7 @@ spec:
               enabled: true
               ingressClassName: public
               hosts:
-                - prometheus.<NODE_IP>.nip.io
+                - prometheus.172.17.93.185.nip.io
             prometheusSpec:
               serviceMonitorSelector: {}
               serviceMonitorNamespaceSelector: {}
