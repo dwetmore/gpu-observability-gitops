@@ -10,10 +10,7 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: prometheus-operator-crds
-    # Pin to an existing chart version. To verify availability/match in a cluster shell:
-    # microk8s helm3 search repo prometheus-community/prometheus-operator-crds --versions | rg 'v0\\.78\\.1'
-    # v0.78.1 is not available; use the closest compatible available appVersion (v0.81.0).
-    targetRevision: 19.0.0
+    targetRevision: 27.0.0
   destination:
     server: https://kubernetes.default.svc
     namespace: default
