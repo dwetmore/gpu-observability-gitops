@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+configMapGenerator:
+  - name: grafana-dashboard-gpu-dcgm
+    files:
+      - dashboards/gpu-dcgm.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+  - name: grafana-dashboard-node-basic
+    files:
+      - dashboards/node-basic.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+generatorOptions:
+  disableNameSuffixHash: true
