@@ -23,7 +23,7 @@ jobs:
           sudo mv /tmp/kubeconform /usr/local/bin/kubeconform
 
       - name: Render manifests
-        run: kustomize build clusters/microk8s > /tmp/rendered.yaml
+        run: kustomize build . > /tmp/rendered.yaml
 
       - name: Validate manifests
         run: kubeconform -strict -summary -ignore-missing-schemas /tmp/rendered.yaml
