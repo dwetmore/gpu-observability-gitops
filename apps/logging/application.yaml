@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logging
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: 6.17.0
+      helm:
+        releaseName: loki
+        values: |
+          deploymentMode: SingleBinary
+          singleBinary:
+            replicas: 1
+          gateway:
+            enabled: true
+          loki:
+            auth_enabled: false
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: promtail
+      targetRevision: 6.16.6
+      helm:
+        releaseName: promtail
+        values: |
+          config:
+            clients:
+              - url: http://loki-gateway/loki/api/v1/push
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

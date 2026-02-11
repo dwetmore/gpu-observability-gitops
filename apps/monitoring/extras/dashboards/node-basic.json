@@ -1,0 +1,28 @@
+{
+  "title": "Node Basic",
+  "uid": "node-basic",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU Usage %",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [{"expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)", "legendFormat": "{{instance}}"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Used %",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "legendFormat": "{{instance}}"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk Used %",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "targets": [{"expr": "100 - ((node_filesystem_avail_bytes{fstype!~'tmpfs|fuse.lxcfs'} * 100) / node_filesystem_size_bytes{fstype!~'tmpfs|fuse.lxcfs'})", "legendFormat": "{{mountpoint}}"}]
+    }
+  ],
+  "time": {"from": "now-1h", "to": "now"}
+}
