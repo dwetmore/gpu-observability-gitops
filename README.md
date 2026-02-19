@@ -123,3 +123,11 @@ kubectl apply -f apps/monitoring/application.yaml
 argocd app sync monitoring --prune
 ```
 
+
+## WSL2 GPU metrics note
+
+On WSL2 MicroK8s, NVIDIA GPU Operator may skip `dcgm-exporter` when its GPU-node auto-detection gates are not satisfied.
+
+This repository uses the MicroK8s `nvidia` addon for runtime/toolkit/device plugin on the node, and deploys only `nvidia-dcgm-exporter` from GitOps (`apps/gpu-operator/extras`) with `runtimeClassName: nvidia`, a dedicated Service, and a ServiceMonitor scraped every 15s.
+
+The GPU Operator Helm values disable `devicePlugin`, `toolkit`, `gfd`, `migManager`, `validator`, and `dcgmExporter` to avoid conflicts with MicroK8s-managed components and with our directly managed exporter manifests.

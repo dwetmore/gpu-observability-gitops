@@ -17,16 +17,18 @@ spec:
         values: |
           driver:
             enabled: false
+          toolkit:
+            enabled: false
+          devicePlugin:
+            enabled: false
+          gfd:
+            enabled: false
+          migManager:
+            enabled: false
+          validator:
+            enabled: false
           dcgmExporter:
-            enabled: true
-            serviceMonitor:
-              enabled: true
-            config:
-              name: dcgm-metrics
-              mountPath: /etc/dcgm-exporter
-            env:
-              - name: DCGM_EXPORTER_COLLECTORS
-                value: /etc/dcgm-exporter/dcgm-metrics.csv
+            enabled: false
     - repoURL: https://github.com/dwetmore/gpu-observability-gitops.git
       targetRevision: main
       path: apps/gpu-operator/extras
