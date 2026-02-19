@@ -4,7 +4,7 @@ namespace: monitoring
 configMapGenerator:
   - name: dcgm-metrics
     files:
-      - ../../gpu-operator/dcgm-metrics.csv
+      - dcgm-metrics.csv
   - name: grafana-dashboard-gpu-dcgm
     files:
       - dashboards/gpu-dcgm.json
