@@ -8,25 +8,28 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: gpu-operator
-  source:
-    repoURL: https://helm.ngc.nvidia.com/nvidia
-    chart: gpu-operator
-    targetRevision: v24.9.2
-    helm:
-      releaseName: gpu-operator
-      values: |
-        driver:
-          enabled: false
-        dcgmExporter:
-          enabled: true
-          serviceMonitor:
+  sources:
+    - repoURL: https://helm.ngc.nvidia.com/nvidia
+      chart: gpu-operator
+      targetRevision: v24.9.2
+      helm:
+        releaseName: gpu-operator
+        values: |
+          driver:
+            enabled: false
+          dcgmExporter:
             enabled: true
-          config:
-            name: dcgm-metrics
-            mountPath: /etc/dcgm-exporter
-          env:
-            - name: DCGM_EXPORTER_COLLECTORS
-              value: /etc/dcgm-exporter/dcgm-metrics.csv
+            serviceMonitor:
+              enabled: true
+            config:
+              name: dcgm-metrics
+              mountPath: /etc/dcgm-exporter
+            env:
+              - name: DCGM_EXPORTER_COLLECTORS
+                value: /etc/dcgm-exporter/dcgm-metrics.csv
+    - repoURL: https://github.com/dwetmore/gpu-observability-gitops.git
+      targetRevision: main
+      path: apps/gpu-operator/extras
   syncPolicy:
     automated:
       prune: true
