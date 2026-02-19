@@ -123,3 +123,11 @@ kubectl apply -f apps/monitoring/application.yaml
 argocd app sync monitoring --prune
 ```
 
+
+## WSL2 GPU metrics note
+
+On WSL2 MicroK8s, NVIDIA GPU Operator may skip or fail dcgm-exporter deployment because GPU-node auto-detection and related assumptions are not always satisfied in the WSL2 environment.
+
+To make GPU telemetry reliable, this repository deploys `nvidia-device-plugin` and `dcgm-exporter` directly as DaemonSets in `kube-system` with `runtimeClassName: nvidia`, plus a dedicated Service and ServiceMonitor for Prometheus scraping every 15s.
+
+The GPU Operator chart configuration disables its built-in `dcgmExporter` component to avoid duplicate/conflicting exporter workloads.

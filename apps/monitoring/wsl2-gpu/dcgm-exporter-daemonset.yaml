@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: dcgm-exporter
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: dcgm-exporter
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: dcgm-exporter
+    spec:
+      runtimeClassName: nvidia
+      tolerations:
+        - operator: Exists
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: dcgm-exporter
+          image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.8-3.6.0-ubuntu22.04
+          ports:
+            - containerPort: 9400
+              name: metrics
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: dev
+              mountPath: /dev
+            - name: pod-gpu-resources
+              mountPath: /var/lib/kubelet/pod-resources
+              readOnly: true
+            - name: kubelet-device-plugins
+              mountPath: /var/lib/kubelet/device-plugins
+              readOnly: true
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: pod-gpu-resources
+          hostPath:
+            path: /var/lib/kubelet/pod-resources
+        - name: kubelet-device-plugins
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
