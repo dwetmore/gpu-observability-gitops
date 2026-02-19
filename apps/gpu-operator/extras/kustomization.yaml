@@ -7,3 +7,7 @@ configMapGenerator:
       - dcgm-metrics.csv
 generatorOptions:
   disableNameSuffixHash: true
+resources:
+  - nvidia-dcgm-exporter-daemonset.yaml
+  - nvidia-dcgm-exporter-service.yaml
+  - nvidia-dcgm-exporter-servicemonitor.yaml

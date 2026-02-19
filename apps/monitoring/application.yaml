@@ -64,9 +64,6 @@ spec:
     - repoURL: https://github.com/dwetmore/gpu-observability-gitops.git
       targetRevision: main
       path: apps/monitoring/extras
-    - repoURL: https://github.com/dwetmore/gpu-observability-gitops.git
-      targetRevision: main
-      path: apps/monitoring/wsl2-gpu
   syncPolicy:
     automated:
       prune: true

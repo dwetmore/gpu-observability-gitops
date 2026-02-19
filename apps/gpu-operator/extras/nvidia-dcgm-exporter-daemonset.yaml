@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-dcgm-exporter
+  namespace: gpu-operator
+  labels:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-dcgm-exporter
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nvidia-dcgm-exporter
+    spec:
+      runtimeClassName: nvidia
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: dcgm-exporter
+          image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.9-3.6.1-ubuntu22.04
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DCGM_EXPORTER_COLLECTORS
+              value: /etc/dcgm-exporter/dcgm-metrics.csv
+          ports:
+            - name: gpu-metrics
+              containerPort: 9400
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /etc/dcgm-exporter
+              readOnly: true
+      volumes:
+        - name: metrics-config
+          configMap:
+            name: dcgm-metrics

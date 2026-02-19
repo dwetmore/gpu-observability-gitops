@@ -17,6 +17,16 @@ spec:
         values: |
           driver:
             enabled: false
+          toolkit:
+            enabled: false
+          devicePlugin:
+            enabled: false
+          gfd:
+            enabled: false
+          migManager:
+            enabled: false
+          validator:
+            enabled: false
           dcgmExporter:
             enabled: false
     - repoURL: https://github.com/dwetmore/gpu-observability-gitops.git
