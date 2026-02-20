@@ -6,10 +6,11 @@ metadata:
     app.kubernetes.io/name: nvidia-dcgm-exporter
 data:
   dcgm-metrics.csv: |
-    DCGM_FI_DEV_GPU_UTIL
-    DCGM_FI_DEV_FB_USED
-    DCGM_FI_DEV_GPU_TEMP
-    DCGM_FI_DEV_POWER_USAGE
+    # Format: <metric>, <type>, <help>
+    DCGM_FI_DEV_GPU_UTIL, gauge, GPU utilization (in %).
+    DCGM_FI_DEV_FB_USED, gauge, Framebuffer memory used (in MiB).
+    DCGM_FI_DEV_GPU_TEMP, gauge, GPU temperature (in C).
+    DCGM_FI_DEV_POWER_USAGE, gauge, Power draw (in W).
 ---
 apiVersion: apps/v1
 kind: DaemonSet
