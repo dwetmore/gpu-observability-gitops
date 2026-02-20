@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nvidia-dcgm-exporter-metrics
+  labels:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+data:
+  dcgm-metrics.csv: |
+    DCGM_FI_DEV_GPU_UTIL
+    DCGM_FI_DEV_FB_USED
+    DCGM_FI_DEV_GPU_TEMP
+    DCGM_FI_DEV_POWER_USAGE
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-dcgm-exporter
+  namespace: gpu-operator
+  labels:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-dcgm-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nvidia-dcgm-exporter
+    spec:
+      runtimeClassName: nvidia
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: dcgm-exporter
+          image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.8-3.6.0-ubuntu22.04
+          imagePullPolicy: IfNotPresent
+          args:
+            - -f
+            - /etc/dcgm-exporter/dcgm-metrics.csv
+          ports:
+            - name: metrics
+              containerPort: 9400
+              protocol: TCP
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /etc/dcgm-exporter
+              readOnly: true
+      volumes:
+        - name: metrics-config
+          configMap:
+            name: nvidia-dcgm-exporter-metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nvidia-dcgm-exporter
+  namespace: gpu-operator
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+spec:
+  selector:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+  ports:
+    - name: metrics
+      port: 9400
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nvidia-dcgm-exporter
+  namespace: gpu-operator
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-dcgm-exporter
+  namespaceSelector:
+    matchNames:
+      - gpu-operator
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

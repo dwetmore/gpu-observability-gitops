@@ -25,5 +25,10 @@ jobs:
       - name: Render manifests
         run: kustomize build . > /tmp/rendered.yaml
 
+      - name: Render gpu-operator extras
+        run: kustomize build apps/gpu-operator/extras > /tmp/gpu-operator-extras.yaml
+
       - name: Validate manifests
-        run: kubeconform -strict -summary -ignore-missing-schemas /tmp/rendered.yaml
+        run: |
+          kubeconform -strict -summary -ignore-missing-schemas /tmp/rendered.yaml
+          kubeconform -strict -summary -ignore-missing-schemas /tmp/gpu-operator-extras.yaml
