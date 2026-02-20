@@ -2,7 +2,7 @@
   "title": "K8s + GPU Central",
   "uid": "k8s-gpu-central",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 3,
   "refresh": "30s",
   "time": {"from": "now-1h", "to": "now"},
   "templating": {
@@ -38,45 +38,65 @@
   },
   "panels": [
     {
+      "type": "row",
+      "title": "Cluster Health",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+    },
+    {
       "type": "stat",
       "title": "Ready Nodes",
-      "gridPos": {"h": 5, "w": 4, "x": 0, "y": 0},
+      "gridPos": {"h": 5, "w": 4, "x": 0, "y": 1},
       "targets": [{"expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})"}]
     },
     {
       "type": "stat",
       "title": "Running Pods (filtered)",
-      "gridPos": {"h": 5, "w": 4, "x": 4, "y": 0},
+      "gridPos": {"h": 5, "w": 4, "x": 4, "y": 1},
       "targets": [{"expr": "sum(kube_pod_status_phase{namespace=~\"$namespace\",phase=\"Running\"})"}]
     },
     {
       "type": "stat",
       "title": "Cluster CPU Usage (cores)",
-      "gridPos": {"h": 5, "w": 4, "x": 8, "y": 0},
+      "gridPos": {"h": 5, "w": 4, "x": 8, "y": 1},
       "targets": [{"expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}[5m]))"}]
     },
     {
       "type": "stat",
       "title": "Cluster Memory Usage (GiB)",
-      "gridPos": {"h": 5, "w": 4, "x": 12, "y": 0},
+      "gridPos": {"h": 5, "w": 4, "x": 12, "y": 1},
       "targets": [{"expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024"}]
     },
     {
       "type": "stat",
       "title": "Avg GPU Util % (filtered)",
-      "gridPos": {"h": 5, "w": 4, "x": 16, "y": 0},
+      "gridPos": {"h": 5, "w": 4, "x": 16, "y": 1},
       "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\"})"}]
     },
     {
       "type": "stat",
       "title": "GPU Power Total (W)",
-      "gridPos": {"h": 5, "w": 4, "x": 20, "y": 0},
+      "gridPos": {"h": 5, "w": 4, "x": 20, "y": 1},
       "targets": [{"expr": "sum(DCGM_FI_DEV_POWER_USAGE{gpu=~\"$gpu\"})"}]
     },
     {
       "type": "gauge",
       "title": "GPU Workload Saturation Score",
-      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 5},
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 6},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 60},
+              {"color": "red", "value": 85}
+            ]
+          }
+        }
+      },
       "targets": [
         {
           "expr": "100 * (0.5 * avg(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\"}) / 100 + 0.3 * (sum(DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\"}) / clamp_min(sum(DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\"} + DCGM_FI_DEV_FB_FREE{gpu=~\"$gpu\"}), 1)) + 0.2 * avg(DCGM_FI_DEV_MEM_COPY_UTIL{gpu=~\"$gpu\"}) / 100)",
@@ -86,8 +106,32 @@
     },
     {
       "type": "timeseries",
+      "title": "Cluster CPU vs Avg GPU Util",
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 6},
+      "targets": [
+        {"expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}[5m]))", "legendFormat": "CPU cores"},
+        {"expr": "avg(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\"})", "legendFormat": "GPU util %"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cluster Memory vs GPU Memory Used",
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 6},
+      "targets": [
+        {"expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024", "legendFormat": "K8s memory GiB"},
+        {"expr": "sum(DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\"}) / 1024", "legendFormat": "GPU memory GiB"}
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Namespace Workloads",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 13}
+    },
+    {
+      "type": "timeseries",
       "title": "Pod CPU Usage Top 10 (cores)",
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 5},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
       "targets": [
         {
           "expr": "topk(10, sum by (namespace,pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}[5m])))",
@@ -98,7 +142,7 @@
     {
       "type": "timeseries",
       "title": "Pod Memory Usage Top 10 (GiB)",
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 5},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
       "targets": [
         {
           "expr": "topk(10, sum by (namespace,pod) (container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024)",
@@ -107,15 +151,61 @@
       ]
     },
     {
+      "type": "table",
+      "title": "Selected Pod Snapshot (CPU cores)",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22},
+      "targets": [
+        {
+          "expr": "topk(20, sum by (namespace,pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}[5m])))",
+          "legendFormat": "{{namespace}}/{{pod}}",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "GPU Fleet",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 30}
+    },
+    {
       "type": "bargauge",
       "title": "GPU Utilization by Device %",
-      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 13},
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 31},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 60},
+              {"color": "red", "value": 85}
+            ]
+          }
+        }
+      },
       "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\"}) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
     },
     {
       "type": "bargauge",
       "title": "GPU Memory Used by Device %",
-      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 13},
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 31},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      },
       "targets": [
         {
           "expr": "100 * (avg(DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\"}) by (gpu)) / clamp_min((avg(DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\"}) by (gpu) + avg(DCGM_FI_DEV_FB_FREE{gpu=~\"$gpu\"}) by (gpu)), 1)",
@@ -126,43 +216,13 @@
     {
       "type": "bargauge",
       "title": "GPU Power by Device (W)",
-      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 13},
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 31},
       "targets": [{"expr": "avg(DCGM_FI_DEV_POWER_USAGE{gpu=~\"$gpu\"}) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "Cluster CPU vs Avg GPU Util",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
-      "targets": [
-        {"expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}[5m]))", "legendFormat": "CPU cores"},
-        {"expr": "avg(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\"})", "legendFormat": "GPU util %"}
-      ]
-    },
-    {
-      "type": "timeseries",
-      "title": "Cluster Memory vs GPU Memory Used",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
-      "targets": [
-        {"expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024", "legendFormat": "K8s memory GiB"},
-        {"expr": "sum(DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\"}) / 1024", "legendFormat": "GPU memory GiB"}
-      ]
-    },
-    {
-      "type": "table",
-      "title": "Selected Pod Snapshot (CPU cores)",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
-      "targets": [
-        {
-          "expr": "topk(20, sum by (namespace,pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod\",container!=\"\",image!=\"\"}[5m])))",
-          "legendFormat": "{{namespace}}/{{pod}}",
-          "instant": true
-        }
-      ]
     },
     {
       "type": "table",
       "title": "GPU Snapshot (Util/Power/Temp)",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 38},
       "targets": [
         {"expr": "avg(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\"}) by (gpu)", "legendFormat": "Util GPU {{gpu}}", "instant": true},
         {"expr": "avg(DCGM_FI_DEV_POWER_USAGE{gpu=~\"$gpu\"}) by (gpu)", "legendFormat": "Power GPU {{gpu}}", "instant": true},
