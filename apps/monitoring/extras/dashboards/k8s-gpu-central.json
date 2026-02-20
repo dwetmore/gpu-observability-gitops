@@ -1,0 +1,121 @@
+{
+  "title": "K8s + GPU Central",
+  "uid": "k8s-gpu-central",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Ready Nodes",
+      "gridPos": {"h": 5, "w": 4, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})"}]
+    },
+    {
+      "type": "stat",
+      "title": "Running Pods",
+      "gridPos": {"h": 5, "w": 4, "x": 4, "y": 0},
+      "targets": [{"expr": "sum(kube_pod_status_phase{phase=\"Running\"})"}]
+    },
+    {
+      "type": "stat",
+      "title": "Cluster CPU Usage (cores)",
+      "gridPos": {"h": 5, "w": 4, "x": 8, "y": 0},
+      "targets": [{"expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\",image!=\"\"}[5m]))"}]
+    },
+    {
+      "type": "stat",
+      "title": "Cluster Memory Usage (GiB)",
+      "gridPos": {"h": 5, "w": 4, "x": 12, "y": 0},
+      "targets": [{"expr": "sum(container_memory_working_set_bytes{container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024"}]
+    },
+    {
+      "type": "stat",
+      "title": "Avg GPU Util %",
+      "gridPos": {"h": 5, "w": 4, "x": 16, "y": 0},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL)"}]
+    },
+    {
+      "type": "stat",
+      "title": "GPU Power Total (W)",
+      "gridPos": {"h": 5, "w": 4, "x": 20, "y": 0},
+      "targets": [{"expr": "sum(DCGM_FI_DEV_POWER_USAGE)"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Pod CPU Usage Top 10 (cores)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+      "targets": [
+        {
+          "expr": "topk(10, sum by (namespace,pod) (rate(container_cpu_usage_seconds_total{container!=\"\",image!=\"\"}[5m])))",
+          "legendFormat": "{{namespace}}/{{pod}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Pod Memory Usage Top 10 (GiB)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5},
+      "targets": [
+        {
+          "expr": "topk(10, sum by (namespace,pod) (container_memory_working_set_bytes{container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024)",
+          "legendFormat": "{{namespace}}/{{pod}}"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "GPU Utilization by Device %",
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 13},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+    },
+    {
+      "type": "bargauge",
+      "title": "GPU Memory Used by Device %",
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 13},
+      "targets": [
+        {
+          "expr": "100 * (avg(DCGM_FI_DEV_FB_USED) by (gpu)) / clamp_min((avg(DCGM_FI_DEV_FB_USED) by (gpu) + avg(DCGM_FI_DEV_FB_FREE) by (gpu)), 1)",
+          "legendFormat": "GPU {{gpu}}"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "GPU Power by Device (W)",
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 13},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_POWER_USAGE) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cluster CPU vs Avg GPU Util",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {"expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\",image!=\"\"}[5m]))", "legendFormat": "CPU cores"},
+        {"expr": "avg(DCGM_FI_DEV_GPU_UTIL)", "legendFormat": "GPU util %"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cluster Memory vs GPU Memory Used",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {"expr": "sum(container_memory_working_set_bytes{container!=\"\",image!=\"\"}) / 1024 / 1024 / 1024", "legendFormat": "K8s memory GiB"},
+        {"expr": "sum(DCGM_FI_DEV_FB_USED) / 1024", "legendFormat": "GPU memory GiB"}
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top GPU Consumer Pods (CPU)",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28},
+      "targets": [
+        {
+          "expr": "topk(15, sum by (namespace,pod) (rate(container_cpu_usage_seconds_total{container!=\"\",image!=\"\"}[5m])))",
+          "legendFormat": "{{namespace}}/{{pod}}",
+          "instant": true
+        }
+      ]
+    }
+  ]
+}

@@ -17,5 +17,11 @@ configMapGenerator:
     options:
       labels:
         grafana_dashboard: "1"
+  - name: grafana-dashboard-k8s-gpu-central
+    files:
+      - dashboards/k8s-gpu-central.json
+    options:
+      labels:
+        grafana_dashboard: "1"
 generatorOptions:
   disableNameSuffixHash: true

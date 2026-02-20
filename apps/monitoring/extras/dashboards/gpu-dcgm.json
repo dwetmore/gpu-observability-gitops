@@ -2,50 +2,44 @@
   "title": "GPU DCGM Overview",
   "uid": "gpu-dcgm-overview",
   "schemaVersion": 39,
-  "version": 3,
+  "version": 4,
   "refresh": "30s",
   "time": {"from": "now-1h", "to": "now"},
   "panels": [
     {
-      "type": "timeseries",
-      "title": "GPU Utilization %",
-      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+      "type": "stat",
+      "title": "GPUs Detected",
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "count(DCGM_FI_DEV_GPU_UTIL)", "legendFormat": "GPUs"}]
+    },
+    {
+      "type": "stat",
+      "title": "Cluster Avg GPU Util %",
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL)", "legendFormat": "Avg"}]
+    },
+    {
+      "type": "gauge",
+      "title": "Max GPU Temperature (C)",
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "max(DCGM_FI_DEV_GPU_TEMP)", "legendFormat": "Max"}]
+    },
+    {
+      "type": "stat",
+      "title": "Total GPU Power (W)",
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "sum(DCGM_FI_DEV_POWER_USAGE)", "legendFormat": "Total"}]
+    },
+    {
+      "type": "bargauge",
+      "title": "Per-GPU Utilization %",
+      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 5},
       "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
     },
     {
-      "type": "timeseries",
-      "title": "Memory Copy Utilization %",
-      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_MEM_COPY_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "Encoder Utilization %",
-      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_ENC_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "Decoder Utilization %",
-      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_DEC_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "GPU Memory Used (MiB)",
-      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 8},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_FB_USED) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "GPU Memory Free (MiB)",
-      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 8},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_FB_FREE) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "GPU Memory Used %",
-      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+      "type": "bargauge",
+      "title": "Per-GPU Memory Used %",
+      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 5},
       "targets": [
         {
           "expr": "100 * (avg(DCGM_FI_DEV_FB_USED) by (gpu)) / clamp_min((avg(DCGM_FI_DEV_FB_USED) by (gpu) + avg(DCGM_FI_DEV_FB_FREE) by (gpu)), 1)",
@@ -55,51 +49,43 @@
     },
     {
       "type": "timeseries",
-      "title": "GPU Temperature (C)",
-      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_TEMP) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+      "title": "GPU Utilization % (Trend)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_UTIL) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
     },
     {
       "type": "timeseries",
-      "title": "GPU Power Usage (W)",
-      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 16},
+      "title": "GPU Power Usage (W) (Trend)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
       "targets": [{"expr": "avg(DCGM_FI_DEV_POWER_USAGE) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
     },
     {
       "type": "timeseries",
-      "title": "SM Clock (MHz)",
-      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 16},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_SM_CLOCK) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+      "title": "Encoder vs Decoder Utilization %",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {"expr": "avg(DCGM_FI_DEV_ENC_UTIL) by (gpu)", "legendFormat": "ENC GPU {{gpu}}"},
+        {"expr": "avg(DCGM_FI_DEV_DEC_UTIL) by (gpu)", "legendFormat": "DEC GPU {{gpu}}"}
+      ]
     },
     {
       "type": "timeseries",
-      "title": "Memory Clock (MHz)",
-      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 16},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_MEM_CLOCK) by (gpu)", "legendFormat": "GPU {{gpu}}"}]
+      "title": "SM Clock vs Memory Clock (MHz)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {"expr": "avg(DCGM_FI_DEV_SM_CLOCK) by (gpu)", "legendFormat": "SM GPU {{gpu}}"},
+        {"expr": "avg(DCGM_FI_DEV_MEM_CLOCK) by (gpu)", "legendFormat": "MEM GPU {{gpu}}"}
+      ]
     },
     {
-      "type": "timeseries",
-      "title": "Total GPU Power (W)",
-      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 16},
-      "targets": [{"expr": "sum(DCGM_FI_DEV_POWER_USAGE)", "legendFormat": "Cluster Total"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "Total GPU Memory Used (GiB)",
-      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 24},
-      "targets": [{"expr": "sum(DCGM_FI_DEV_FB_USED) / 1024", "legendFormat": "Cluster Total"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "Average GPU Temperature (C)",
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 24},
-      "targets": [{"expr": "avg(DCGM_FI_DEV_GPU_TEMP)", "legendFormat": "Cluster Avg"}]
-    },
-    {
-      "type": "timeseries",
-      "title": "Peak GPU Utilization %",
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 24},
-      "targets": [{"expr": "max(DCGM_FI_DEV_GPU_UTIL)", "legendFormat": "Cluster Peak"}]
+      "type": "table",
+      "title": "GPU Snapshot (Power, Temp, Util)",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28},
+      "targets": [
+        {"expr": "avg(DCGM_FI_DEV_POWER_USAGE) by (gpu)", "legendFormat": "Power GPU {{gpu}}", "instant": true},
+        {"expr": "avg(DCGM_FI_DEV_GPU_TEMP) by (gpu)", "legendFormat": "Temp GPU {{gpu}}", "instant": true},
+        {"expr": "avg(DCGM_FI_DEV_GPU_UTIL) by (gpu)", "legendFormat": "Util GPU {{gpu}}", "instant": true}
+      ]
     }
   ]
 }
