@@ -1,5 +1,16 @@
 # gpu-observability-gitops
 
+## What it is
+A pure GitOps observability platform for NVIDIA GPU workloads on MicroK8s.
+
+## What it does
+- Deploys and configures GPU telemetry (DCGM exporter).
+- Wires metrics into Prometheus and dashboards into Grafana.
+- Adds log aggregation via Loki/Promtail for correlated troubleshooting.
+
+## Why it matters
+It provides production-style visibility for AI/GPU infrastructure, enabling faster diagnosis, capacity planning, and operational reliability.
+
 Pure GitOps GPU observability stack for single-node MicroK8s using Argo CD app-of-apps.
 
 ## Architecture
